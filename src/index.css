@@ -1,0 +1,160 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 20 14.3% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 20 14.3% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14.3% 4.1%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 120 6% 94%;
+    --secondary-foreground: 24 9.8% 10%;
+    --muted: 60 4.8% 95.9%;
+    --muted-foreground: 25 5.3% 44.7%;
+    --accent: 120 6% 94%;
+    --accent-foreground: 24 9.8% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 20 5.9% 90%;
+    --input: 20 5.9% 90%;
+    --ring: 142 76% 36%;
+    --radius: 0.75rem;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    --earth: 25 45% 40%;
+    --earth-foreground: 0 0% 98%;
+    --harvest: 36 90% 50%;
+    --harvest-foreground: 0 0% 98%;
+  }
+
+  .dark {
+    --background: 20 14.3% 4.1%;
+    --foreground: 60 9.1% 97.8%;
+    --card: 24 9.8% 8%;
+    --card-foreground: 60 9.1% 97.8%;
+    --popover: 24 9.8% 8%;
+    --popover-foreground: 60 9.1% 97.8%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 120 6% 15%;
+    --secondary-foreground: 60 9.1% 97.8%;
+    --muted: 12 6.5% 15.1%;
+    --muted-foreground: 24 5.4% 63.9%;
+    --accent: 12 6.5% 15.1%;
+    --accent-foreground: 60 9.1% 97.8%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 60 9.1% 97.8%;
+    --border: 12 6.5% 15.1%;
+    --input: 12 6.5% 15.1%;
+    --ring: 142 76% 36%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    --earth: 25 45% 40%;
+    --earth-foreground: 0 0% 98%;
+    --harvest: 36 90% 50%;
+    --harvest-foreground: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(120, 60%, 50%) 100%);
+  }
+
+  .gradient-earth {
+    background: linear-gradient(135deg, hsl(25, 45%, 40%) 0%, hsl(36, 90%, 50%) 100%);
+  }
+
+  .gradient-hero {
+    background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(120, 60%, 50%) 50%, hsl(36, 90%, 50%) 100%);
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 999px;
+  }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-area-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-area-right {
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .prose h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-top: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .prose p {
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+  .prose ul, .prose ol {
+    padding-left: 1.25rem;
+  }
+  .prose li {
+    font-size: 0.875rem;
+  }
+  .prose hr {
+    border-color: hsl(var(--border));
+  }
+  .prose a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+}

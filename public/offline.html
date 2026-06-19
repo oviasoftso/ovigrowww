@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OviGrow - Offline</title>
+    <meta name="theme-color" content="#16a34a">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .offline-container {
+            max-width: 400px;
+            width: 100%;
+        }
+        
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            color: #64748b;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #0f172a;
+        }
+        
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: #475569;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-top: 1rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #fbbf24;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                opacity: 0.6;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0.6;
+            }
+        }
+        
+        .app-version {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <!-- Using SVG icon instead of emoji -->
+        <svg class="offline-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="#64748b" stroke-width="2"/>
+            <line x1="12" y1="8" x2="12" y2="12" stroke="#64748b" stroke-width="2"/>
+            <line x1="12" y1="16" x2="12.01" y2="16" stroke="#64748b" stroke-width="2"/>
+        </svg>
+        
+        <h1>You're Offline</h1>
+        <p>OviGrow is designed to work offline, but some features require an internet connection.</p>
+        <p>You can continue to use the app with cached data, and your actions will sync when you're back online.</p>
+        
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span>Checking connection...</span>
+        </div>
+        
+        <div class="app-version">
+            OviGrow v1.0.0
+        </div>
+    </div>
+    
+    <script>
+        // Simple script to update status when online
+        function updateOnlineStatus() {
+            const statusDot = document.querySelector('.status-dot');
+            const statusText = document.querySelector('.status-indicator span');
+            
+            if (navigator.onLine) {
+                statusDot.style.backgroundColor = '#10b981';
+                statusText.textContent = 'You are now online';
+            } else {
+                statusDot.style.backgroundColor = '#fbbf24';
+                statusText.textContent = 'You are currently offline';
+            }
+        }
+        
+        // Update status on load and when connectivity changes
+        window.addEventListener('load', updateOnlineStatus);
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@ import { useStore } from '@/lib/store'
 import { cn } from '@/lib/utils'
 
 export function DashboardLayout() {
-  const { sidebarOpen } = useStore()
+  const { sidebarOpen, mobileSidebarOpen } = useStore()
 
   return (
     <div className="min-h-screen bg-background">
@@ -15,7 +15,10 @@ export function DashboardLayout() {
           'transition-all duration-300',
           // Desktop: offset by sidebar width
           'lg:ml-16',
-          sidebarOpen && 'lg:ml-64'
+          sidebarOpen && 'lg:ml-64',
+          // Mobile: shift to right when mobile sidebar open
+          'translate-x-0 transition-transform duration-300',
+          mobileSidebarOpen && 'translate-x-[18rem]'
         )}
       >
         <Header />

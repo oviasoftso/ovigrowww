@@ -331,7 +331,7 @@ export default function FarmMap() {
                       onClick={() => setSelectedField(field)}
                     >
                       <div
-                        className="border-2 rounded-lg px-3 py-2 text-xs font-medium shadow-md backdrop-blur-sm"
+                        className="border-2 rounded-lg px-3 py-2 text-xs font-medium shadow-md"
                         style={{
                           borderColor: field.color,
                           backgroundColor: `${field.color}20`,
@@ -447,7 +447,7 @@ export default function FarmMap() {
 
       {/* Field Detail Dialog */}
       {selectedField && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4">
           <Card className="w-full max-w-md">
             <CardHeader>
               <div className="flex items-center justify-between">

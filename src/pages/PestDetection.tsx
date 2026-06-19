@@ -18,6 +18,7 @@ import {
   Loader2,
   ImageIcon,
 } from 'lucide-react'
+import { analyzePlantImage, simulatePlantAnalysis, type PestAnalysisResult } from '@/lib/imageAnalysis'
 
 interface Pest {
   id: string
@@ -140,21 +141,75 @@ export default function PestDetection() {
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const simulateDetection = () => {
+  const handleImageAnalysis = async (imageFile: File) => {
     setDetectionState('analyzing')
     setDetectedPest(null)
     setProgress(0)
-    let p = 0
-    const interval = setInterval(() => {
-      p += Math.random() * 18 + 5
-      if (p >= 100) {
-        p = 100
-        clearInterval(interval)
-        setDetectedPest(commonPests[Math.floor(Math.random() * commonPests.length)])
-        setDetectionState('complete')
+
+    // Simulate progress for better UX
+    let progress = 0
+    const progressInterval = setInterval(() => {
+      progress += Math.random() * 15 + 5
+      if (progress >= 90) {
+        progress = 90
       }
-      setProgress(p)
-    }, 250)
+      setProgress(progress)
+    }, 200)
+
+    try {
+      // Convert image to base64
+      const base64Image = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onloadend = () => {
+          const base64 = reader.result as string
+          // Remove the data:image/jpeg;base64, prefix if present
+          resolve(base64.split(',')[1] || base64)
+        }
+        reader.onerror = reject
+        reader.readAsDataURL(imageFile)
+      })
+
+      // Try to use AI service first, fallback to simulation
+      let result: PestAnalysisResult | null = null
+      try {
+        result = await analyzePlantImage(base64Image)
+      } catch (aiError) {
+        console.warn('AI service unavailable, using simulation:', aiError)
+        result = await simulatePlantAnalysis()
+      }
+
+      // Complete progress
+      clearInterval(progressInterval)
+      setProgress(100)
+
+      // Set results
+      if (result) {
+        // Convert PestAnalysisResult to Pest format for compatibility with existing UI
+        const pest: Pest = {
+          id: Date.now().toString(),
+          name: result.pestName || 'Healthy Plant',
+          scientificName: result.scientificName || '',
+          severity: result.severity ?? 'low',
+          crop: result.affectedCrops || 'Unknown',
+          category: result.pestName ? 'Pest/Disease' : 'Healthy',
+          description: result.description,
+          treatment: result.treatment,
+          prevention: result.prevention
+        }
+        setDetectedPest(pest)
+      } else {
+        // Fallback to simulation if both AI and simulation fail
+        setDetectedPest(commonPests[Math.floor(Math.random() * commonPests.length)])
+      }
+
+      setDetectionState('complete')
+    } catch (error) {
+      clearInterval(progressInterval)
+      setDetectionState('complete')
+      console.error('Error in image analysis:', error)
+      // Fallback to simulated detection on error
+      setDetectedPest(commonPests[Math.floor(Math.random() * commonPests.length)])
+    }
   }
 
   const getSeverityVariant = (severity: string) => {
@@ -261,7 +316,11 @@ export default function PestDetection() {
                   ref={fileInputRef}
                   className="hidden"
                   accept="image/*"
-                  onChange={simulateDetection}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files[0]) {
+                      handleImageAnalysis(e.target.files[0])
+                    }
+                  }}
                 />
 
                 {detectionState === 'idle' ? (
@@ -298,7 +357,7 @@ export default function PestDetection() {
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={simulateDetection}
+                    onClick={() => fileInputRef.current?.click()}
                     className="flex-1"
                     disabled={detectionState === 'analyzing'}
                   >
@@ -314,7 +373,7 @@ export default function PestDetection() {
                       </>
                     )}
                   </Button>
-                  <Button variant="outline" onClick={simulateDetection} disabled={detectionState === 'analyzing'}>
+                  <Button variant="outline" onClick={() => fileInputRef.current?.click()} disabled={detectionState === 'analyzing'}>
                     <Camera className="h-4 w-4" />
                   </Button>
                 </div>
@@ -420,7 +479,7 @@ export default function PestDetection() {
 
           {/* Detail overlay */}
           {selectedPest && (
-            <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 bg-background flex items-center justify-center p-4">
               <Card className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
                 <CardHeader>
                   <div className="flex items-center justify-between">

@@ -1,129 +1,101 @@
-import { openDB, type IDBPDatabase, type DBSchema } from 'idb'
+import Dexie, { Table } from 'dexie'
 
 const DB_NAME = 'ovigrow-offline'
 const DB_VERSION = 1
 
-interface OfflineDB extends DBSchema {
-  chatMessages: {
+// Define the database schema
+export class OfflineDatabase extends Dexie {
+  chatMessages!: Table<{
+    id: string
+    role: 'user' | 'assistant'
+    content: string
+    timestamp: number
+    model?: string
+  }, string>
+  
+  syncQueue!: Table<{
+    id: string
+    action: 'create' | 'update' | 'delete'
+    store: string
+    data: unknown
+    timestamp: number
+    retries: number
+  }, string>
+  
+  cache!: Table<{
     key: string
-    value: {
-      id: string
-      role: 'user' | 'assistant'
-      content: string
-      timestamp: number
-      model?: string
-    }
-    indexes: { 'by-timestamp': number }
-  }
-  syncQueue: {
-    key: string
-    value: {
-      id: string
-      action: 'create' | 'update' | 'delete'
-      store: string
-      data: unknown
-      timestamp: number
-      retries: number
-    }
-    indexes: { 'by-timestamp': number }
-  }
-  cache: {
-    key: string
-    value: {
-      key: string
-      data: unknown
-      timestamp: number
-      ttl: number
-    }
-  }
-}
-
-let dbPromise: Promise<IDBPDatabase<OfflineDB>> | null = null
-
-function getDB() {
-  if (!dbPromise) {
-    dbPromise = openDB<OfflineDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        // Chat messages store
-        if (!db.objectStoreNames.contains('chatMessages')) {
-          const chatStore = db.createObjectStore('chatMessages', { keyPath: 'id' })
-          chatStore.createIndex('by-timestamp', 'timestamp')
-        }
-
-        // Sync queue store
-        if (!db.objectStoreNames.contains('syncQueue')) {
-          const syncStore = db.createObjectStore('syncQueue', { keyPath: 'id' })
-          syncStore.createIndex('by-timestamp', 'timestamp')
-        }
-
-        // Generic cache store
-        if (!db.objectStoreNames.contains('cache')) {
-          db.createObjectStore('cache', { keyPath: 'key' })
-        }
-      },
+    data: unknown
+    timestamp: number
+    ttl: number
+  }, string>
+  
+  constructor() {
+    super(DB_NAME)
+    this.version(DB_VERSION).stores({
+      chatMessages: '++id, timestamp',
+      syncQueue: '++id, timestamp, retries',
+      cache: '++key, timestamp'
     })
   }
-  return dbPromise
 }
+
+export const db = new OfflineDatabase()
 
 // Chat message operations
 export async function saveChatMessage(msg: { id: string; role: 'user' | 'assistant'; content: string; model?: string }) {
-  const db = await getDB()
-  await db.put('chatMessages', { ...msg, timestamp: Date.now() })
+  await db.chatMessages.add({ ...msg, timestamp: Date.now() })
 }
 
 export async function getChatMessages(): Promise<Array<{ id: string; role: 'user' | 'assistant'; content: string; timestamp: number; model?: string }>> {
-  const db = await getDB()
-  return db.getAllFromIndex('chatMessages', 'by-timestamp')
+  return await db.chatMessages.orderBy('timestamp').reverse().toArray()
 }
 
 export async function clearChatMessages() {
-  const db = await getDB()
-  await db.clear('chatMessages')
+  await db.chatMessages.clear()
 }
 
 // Sync queue operations
 export async function addToSyncQueue(action: 'create' | 'update' | 'delete', store: string, data: unknown) {
-  const db = await getDB()
   const id = `sync-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-  await db.put('syncQueue', { id, action, store, data, timestamp: Date.now(), retries: 0 })
+  await db.syncQueue.add({
+    id,
+    action,
+    store,
+    data,
+    timestamp: Date.now(),
+    retries: 0
+  })
 }
 
 export async function getSyncQueue() {
-  const db = await getDB()
-  return db.getAll('syncQueue')
+  return await db.syncQueue.orderBy('timestamp').toArray()
 }
 
 export async function removeSyncItem(id: string) {
-  const db = await getDB()
-  await db.delete('syncQueue', id)
+  await db.syncQueue.delete(id)
 }
 
 export async function clearSyncQueue() {
-  const db = await getDB()
-  await db.clear('syncQueue')
+  await db.syncQueue.clear()
 }
 
 // Cache operations
 export async function getCached(key: string): Promise<unknown | null> {
-  const db = await getDB()
-  const entry = await db.get('cache', key)
+  const entry = await db.cache.get(key)
   if (!entry) return null
   if (Date.now() - entry.timestamp > entry.ttl) {
-    await db.delete('cache', key)
+    await db.cache.delete(key)
     return null
   }
   return entry.data
 }
 
 export async function setCache(key: string, data: unknown, ttl: number) {
-  const db = await getDB()
-  await db.put('cache', { key, data, timestamp: Date.now(), ttl })
+  await db.cache.put({ key, data, timestamp: Date.now(), ttl })
 }
 
 export async function clearCache() {
-  const db = await getDB()
-  await db.clear('cache')
+  await db.cache.clear()
 }
 
 // Online/offline detection
@@ -154,13 +126,25 @@ export async function processSyncQueue() {
 
   // In a real app, this would sync with Supabase
   // For now, we just clear the queue since data is local
-  for (const item of queue) {
+  // But we'll keep track of retries for failed operations
+  const itemsToProcess = await db.syncQueue.toArray()
+  
+  for (const item of itemsToProcess) {
     try {
-      // Sync logic would go here
+      // Sync logic would go here - in a real implementation,
+      // this would send data to Supabase backend
+      console.log('Processing sync item:', item)
+      
+      // For demo purposes, we'll just remove the item
       await removeSyncItem(item.id)
-    } catch {
-      // Keep in queue for retry
-      if (item.retries >= 3) {
+    } catch (error) {
+      console.error('Failed to process sync item:', item, error)
+      
+      // Keep in queue for retry if under max retries
+      if (item.retries < 3) {
+        await db.syncQueue.update(item.id, { retries: item.retries + 1 })
+      } else {
+        // Remove after max retries to prevent infinite loop
         await removeSyncItem(item.id)
       }
     }

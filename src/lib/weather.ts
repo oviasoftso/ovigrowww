@@ -90,7 +90,7 @@ export async function fetchWeather(lat = DEFAULT_LAT, lon = DEFAULT_LON): Promis
   if (!response.ok) throw new Error(`Weather API error: ${response.status}`)
 
   const data = await response.json()
-  const now = Date.now()
+  const nowMs = Date.now()
 
   const current: CurrentWeather = {
     time: data.current.time,
@@ -103,19 +103,18 @@ export async function fetchWeather(lat = DEFAULT_LAT, lon = DEFAULT_LON): Promis
     ...getWeatherInfo(data.current.weather_code),
   }
 
-  // Get next 24 hours of hourly data
-  const currentHour = new Date(data.current.time).getHours()
+  // Get next 24 hours of hourly data (starting from current hour)
+  const nowObj = new Date()
   const hourly: HourlyForecast[] = data.hourly.time
-    .slice(0, 48)
     .map((time: string, i: number) => ({
       time: new Date(time).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false }),
       temperature: Math.round(data.hourly.temperature_2m[i]),
       weatherCode: data.hourly.weather_code[i],
       ...getWeatherInfo(data.hourly.weather_code[i]),
     }))
-    .filter((h: HourlyForecast) => {
-      const hour = parseInt(h.time.split(':')[0])
-      return hour >= currentHour
+    .filter((h: HourlyForecast, index: number) => {
+      const forecastTime = new Date(data.hourly.time[index])
+      return forecastTime >= nowObj
     })
     .slice(0, 8)
 
@@ -128,7 +127,7 @@ export async function fetchWeather(lat = DEFAULT_LAT, lon = DEFAULT_LON): Promis
     ...getWeatherInfo(data.daily.weather_code[i]),
   }))
 
-  const weatherData: WeatherData = { current, hourly, daily, fetchedAt: now }
+  const weatherData: WeatherData = { current, hourly, daily, fetchedAt: nowMs }
 
   // Cache the result
   try {

@@ -142,7 +142,7 @@ export function Sidebar() {
       {/* Mobile sidebar backdrop */}
       {mobileSidebarOpen && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-50 bg-black/50 lg:hidden transition-opacity"
           onClick={() => setMobileSidebarOpen(false)}
         />
       )}
@@ -154,7 +154,7 @@ export function Sidebar() {
           mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex h-full flex-col pb-[env(safe-area-inset-bottom)]">
           {/* Mobile logo + close */}
           <div className="flex h-16 items-center justify-between border-b px-4 pt-[env(safe-area-inset-top)]">
             <div className="flex items-center gap-2">

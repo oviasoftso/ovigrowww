@@ -297,7 +297,7 @@ export default function AIChat() {
       </motion.div>
 
       {/* Chat Area */}
-      <div className="flex-1 flex flex-col overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm">
+      <div className="flex-1 flex flex-col overflow-hidden rounded-xl border border-border bg-card">
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin">
           <AnimatePresence mode="wait">
             {messages.length === 0 && (
@@ -327,7 +327,7 @@ export default function AIChat() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => handleSend(qp.prompt)}
-                      className="group flex items-center gap-3 rounded-xl border border-border/50 bg-card/80 p-3.5 text-left hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+                      className="group flex items-center gap-3 rounded-xl border border-border bg-card p-3.5 text-left hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
                     >
                       <span className="text-lg">{qp.icon}</span>
                       <span className="text-sm font-medium group-hover:text-primary transition-colors">{qp.label}</span>
@@ -398,7 +398,7 @@ export default function AIChat() {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-border/50 p-3 bg-card/30 backdrop-blur-sm">
+        <div className="border-t border-border p-3 bg-card">
           <div className="flex gap-2 items-end">
             <Textarea
               ref={textareaRef}
@@ -407,7 +407,7 @@ export default function AIChat() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              className="min-h-[40px] max-h-[120px] resize-none rounded-xl border-border/50 bg-background/50 text-sm focus-visible:ring-primary/30"
+              className="min-h-[40px] max-h-[120px] resize-none rounded-xl border-border bg-background text-sm focus-visible:ring-primary/30"
             />
             <Button
               onClick={() => handleSend()}

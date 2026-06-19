@@ -73,6 +73,7 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
 }
 
@@ -81,18 +82,8 @@
     text-wrap: balance;
   }
 
-  .glass {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  .glass-dark {
-    background: rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
+  /* Removed glassmorphism effects */
+  
   .gradient-primary {
     background: linear-gradient(135deg, hsl(142, 76%, 36%) 0%, hsl(120, 60%, 50%) 100%);
   }
@@ -131,6 +122,19 @@
   }
   .safe-area-right {
     padding-right: env(safe-area-inset-right);
+  }
+
+  /* Custom loading screen styles */
+  .loading-screen {
+    @apply fixed inset-0 z-50 flex items-center justify-center bg-background dark:bg-foreground;
+  }
+  
+  .loading-spinner {
+    @apply w-16 h-16 border-4 border-primary/20 border-t-primary animate-spin rounded-full;
+  }
+  
+  .loading-text {
+    @apply mt-6 text-lg font-medium text-foreground/80 dark:text-foreground/70;
   }
 
   .prose h3 {

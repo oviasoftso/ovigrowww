@@ -158,12 +158,12 @@ export default function FarmDiary() {
     setIsAddOpen(false)
   }
 
-  const getMoodEmoji = (mood: string) => {
+  const getMoodIcon = (mood: string) => {
     switch (mood) {
-      case 'excellent': return 'Excellent'
-      case 'good': return 'Good'
-      case 'average': return 'Average'
-      case 'poor': return 'Poor'
+      case 'excellent': return <span className="flex items-center gap-1"><Leaf className="h-4 w-4 text-green-500" /> Excellent</span>
+      case 'good': return <span className="flex items-center gap-1"><Sprout className="h-4 w-4 text-green-400" /> Good</span>
+      case 'average': return <span className="flex items-center gap-1"><Wheat className="h-4 w-4 text-yellow-500" /> Average</span>
+      case 'poor': return <span className="flex items-center gap-1"><Bug className="h-4 w-4 text-red-500" /> Poor</span>
       default: return mood
     }
   }
@@ -407,7 +407,7 @@ export default function FarmDiary() {
                         {entry.field}
                       </span>
                       <span>{entry.weather}</span>
-                      <span>Day: {getMoodEmoji(entry.mood)}</span>
+                      <span>Day: {getMoodIcon(entry.mood)}</span>
                     </div>
                   </CardContent>
                 </Card>

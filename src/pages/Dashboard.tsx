@@ -13,6 +13,11 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Loader2,
+  Leaf,
+  Thermometer,
+  AlertTriangle,
+  CheckCircle,
+  Users,
 } from 'lucide-react'
 import { fetchWeather, type WeatherData } from '@/lib/weather'
 import { fetchMarketPrices, type CropPrice } from '@/lib/market-data'
@@ -57,7 +62,7 @@ export default function Dashboard() {
       value: '12',
       change: '+2 this month',
       trend: 'up' as const,
-      icon: Sprout,
+      icon: Leaf,
       color: 'text-green-600',
       bgColor: 'bg-green-100 dark:bg-green-900/20',
     },
@@ -75,7 +80,7 @@ export default function Dashboard() {
       value: weatherRisk.value,
       change: weather ? `${weather.current.temperature}°C - ${weatherRisk.change}` : weatherRisk.change,
       trend: weatherRisk.trend,
-      icon: CloudSun,
+      icon: Thermometer,
       color: weatherRisk.value === 'High' ? 'text-red-600' : 'text-yellow-600',
       bgColor: weatherRisk.value === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20',
     },
@@ -182,15 +187,19 @@ export default function Dashboard() {
                         ? 'bg-green-100 text-green-600 dark:bg-green-900/20'
                         : activity.type === 'irrigation'
                         ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/20'
+                        : activity.type === 'social'
+                        ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/20'
                         : 'bg-gray-100 text-gray-600 dark:bg-gray-900/20'
                     }`}
                   >
                     {activity.type === 'pest' ? (
-                      <Bug className="h-4 w-4" />
+                      <AlertTriangle className="h-4 w-4" />
                     ) : activity.type === 'harvest' ? (
-                      <Sprout className="h-4 w-4" />
+                      <CheckCircle className="h-4 w-4" />
                     ) : activity.type === 'irrigation' ? (
                       <Droplets className="h-4 w-4" />
+                    ) : activity.type === 'social' ? (
+                      <Users className="h-4 w-4" />
                     ) : (
                       <Wallet className="h-4 w-4" />
                     )}
@@ -215,7 +224,7 @@ export default function Dashboard() {
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
             <button className="flex items-center gap-3 rounded-lg border p-4 hover:bg-accent transition-colors">
-              <Sprout className="h-8 w-8 text-green-600" />
+              <Leaf className="h-8 w-8 text-green-600" />
               <div className="text-left">
                 <p className="font-medium">Add Crop</p>
                 <p className="text-xs text-muted-foreground">Record new planting</p>
@@ -229,7 +238,7 @@ export default function Dashboard() {
               </div>
             </button>
             <button className="flex items-center gap-3 rounded-lg border p-4 hover:bg-accent transition-colors">
-              <Bug className="h-8 w-8 text-red-600" />
+              <AlertTriangle className="h-8 w-8 text-red-600" />
               <div className="text-left">
                 <p className="font-medium">Report Pest</p>
                 <p className="text-xs text-muted-foreground">Flag pest issue</p>

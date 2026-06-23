@@ -54,6 +54,14 @@ export default defineConfig({
             urlPattern: /^https:\/\/openrouter\.ai\/.*/i,
             handler: 'NetworkOnly',
           },
+          {
+            urlPattern: /^https:\/\/text\.pollinations\.ai\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /^https:\/\/hermes\.pollinations\.ai\/.*/i,
+            handler: 'NetworkOnly',
+          },
         ],
       },
     }),

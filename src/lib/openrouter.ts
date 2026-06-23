@@ -133,4 +133,15 @@ export const AI_MODELS = {
   'gemini-flash': 'google/gemini-flash-latest',
 } as const
 
+export const FREE_MODELS = {
+  'llama-3.1-8b': 'meta-llama/llama-3.1-8b-instruct',
+  'llama-3.1-70b': 'meta-llama/llama-3.1-70b-instruct',
+  'gemma-2-9b': 'google/gemma-2-9b-it',
+  'mistral-7b': 'mistralai/mistral-7b-instruct',
+  'mixtral-8x7b': 'mistralai/mixtral-8x7b-instruct',
+  'command-r': 'cohere/command-r',
+  'command-r-plus': 'cohere/command-r-plus',
+} as const
+
 export type AIModelKey = keyof typeof AI_MODELS
+export type FreeModelKey = keyof typeof FREE_MODELS

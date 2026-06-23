@@ -2,7 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { streamChatCompletion, AI_MODELS, type ChatMessage, type AIModelKey } from '@/lib/openrouter'
+import { AI_MODELS, FREE_MODELS } from '@/lib/openrouter'
+import { enhancedStreamChatCompletion, type AIModelKey, type FreeModelKey } from '@/lib/ai-gateway'
 import { useStore } from '@/lib/store'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -183,14 +184,14 @@ export default function AIChat() {
     }
     setMessages((prev) => [...prev, assistantMessage])
 
-    const chatMessages: ChatMessage[] = [
+    const chatMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
       { role: 'system', content: SYSTEM_PROMPT },
       ...messages.map((m) => ({ role: m.role as 'user' | 'assistant', content: m.content })),
       { role: 'user', content: text },
     ]
 
     try {
-      await streamChatCompletion(
+      await enhancedStreamChatCompletion(
         {
           model: selectedModel,
           messages: chatMessages,
@@ -213,7 +214,7 @@ export default function AIChat() {
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessage.id
-                ? { ...m, content: `**Error:** ${error.message}. Please check your API key and try again.` }
+                ? { ...m, content: `**Error:** ${error.message}. The system will automatically try alternative AI providers.` }
                 : m
             )
           )
@@ -224,7 +225,7 @@ export default function AIChat() {
       setMessages((prev) =>
         prev.map((m) =>
           m.id === assistantMessage.id
-            ? { ...m, content: '**Error:** Failed to connect to AI service. Please try again.' }
+            ? { ...m, content: '**Error:** Failed to connect to AI service. The system will automatically try alternative AI providers.' }
             : m
         )
       )
@@ -249,13 +250,22 @@ export default function AIChat() {
     setTimeout(() => setCopiedId(null), 2000)
   }
 
-  const modelOptions: { key: AIModelKey; label: string }[] = [
-    { key: 'claude-sonnet-4', label: 'Claude Sonnet 4' },
-    { key: 'gpt-4.1', label: 'GPT-4.1' },
-    { key: 'gemini-pro', label: 'Gemini Pro' },
-    { key: 'gpt-4.1-mini', label: 'GPT-4.1 Mini' },
-    { key: 'claude-haiku', label: 'Claude Haiku' },
-    { key: 'gemini-flash', label: 'Gemini Flash' },
+  const modelOptions: { key: AIModelKey | FreeModelKey; label: string; provider: string }[] = [
+    // Paid models (OpenRouter)
+    { key: 'claude-sonnet-4', label: 'Claude Sonnet 4', provider: 'OpenRouter' },
+    { key: 'gpt-4.1', label: 'GPT-4.1', provider: 'OpenRouter' },
+    { key: 'gemini-pro', label: 'Gemini Pro', provider: 'OpenRouter' },
+    { key: 'gpt-4.1-mini', label: 'GPT-4.1 Mini', provider: 'OpenRouter' },
+    { key: 'claude-haiku', label: 'Claude Haiku', provider: 'OpenRouter' },
+    { key: 'gemini-flash', label: 'Gemini Flash', provider: 'OpenRouter' },
+    
+    // Free models (Fallback options)
+    { key: 'llama-3.1-70b', label: 'Llama 3.1 70B', provider: 'Free' },
+    { key: 'llama-3.1-8b', label: 'Llama 3.1 8B', provider: 'Free' },
+    { key: 'mixtral-8x7b', label: 'Mixtral 8x7B', provider: 'Free' },
+    { key: 'mistral-7b', label: 'Mistral 7B', provider: 'Free' },
+    { key: 'gemma-2-9b', label: 'Gemma 2 9B', provider: 'Free' },
+    { key: 'command-r-plus', label: 'Command R+', provider: 'Free' },
   ]
 
   return (
@@ -282,8 +292,13 @@ export default function AIChat() {
             </SelectTrigger>
             <SelectContent>
               {modelOptions.map((model) => (
-                <SelectItem key={model.key} value={AI_MODELS[model.key]} className="text-xs">
-                  {model.label}
+                <SelectItem key={model.key} value={model.provider === 'OpenRouter' ? AI_MODELS[model.key as AIModelKey] : FREE_MODELS[model.key as FreeModelKey]} className="text-xs">
+                  <div className="flex items-center justify-between w-full">
+                    <span>{model.label}</span>
+                    <span className={`text-xs px-1.5 py-0.5 rounded ${model.provider === 'OpenRouter' ? 'bg-primary/10 text-primary' : 'bg-green-500/10 text-green-600 dark:text-green-400'}`}>
+                      {model.provider}
+                    </span>
+                  </div>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -423,7 +438,10 @@ export default function AIChat() {
             </Button>
           </div>
           <p className="text-[10px] text-muted-foreground/50 mt-1.5 px-1">
-            {modelOptions.find((m) => AI_MODELS[m.key] === selectedModel)?.label || 'Custom'} · Responses may be inaccurate
+            {modelOptions.find((m) => 
+              (m.provider === 'OpenRouter' && AI_MODELS[m.key as AIModelKey] === selectedModel) || 
+              (m.provider === 'Free' && FREE_MODELS[m.key as FreeModelKey] === selectedModel)
+            )?.label || 'Custom'} · Responses may be inaccurate
           </p>
         </div>
       </div>
